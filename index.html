@@ -32,7 +32,7 @@
     <style>
         body { background-color: #e2e8f0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding-bottom: 50px; font-family: 'Noto Sans TC', sans-serif; }
         
-        /* 💡 修正手機版裁切：新增 Wrapper 來負責縮放，讓內部 Card 保持原尺寸供截圖 */
+        /* 💡 修正手機版裁切：Wrapper 負責縮放，Card 保持原尺寸 */
         #poster-wrapper { width: 720px; transform-origin: top center; flex-shrink: 0; }
         #poster-card { width: 720px; min-height: 900px; background-color: #fdfbf7; position: relative; overflow: hidden; }
         
@@ -43,7 +43,6 @@
         .bg-orb-bottom { position: absolute; bottom: -150px; left: -250px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(61, 90, 75, 0.08) 0%, rgba(253, 251, 247, 0) 70%); border-radius: 50%; z-index: 0; }
 
         @media (max-width: 768px) { 
-            /* 針對手機版，縮放外層 Wrapper，不影響內層截圖 */
             #poster-wrapper { transform: scale(0.5); margin-bottom: -450px; } 
             .editor-container { width: 95% !important; } 
         }
@@ -208,10 +207,8 @@
                     </div> 
                 </div>
                 
-                <div id="quote-box" class="w-full mt-6 flex flex-col items-center justify-center text-center relative">
-                    <span class="w-10 h-[2px] bg-secondary mb-4 rounded-full"></span>
-                    <p id="out-quote" class="font-serif text-primary text-[22px] font-bold leading-relaxed tracking-wider px-6"></p>
-                    <span class="w-10 h-[2px] bg-secondary mt-4 rounded-full"></span>
+                <div id="quote-box" class="w-full mt-10 bg-gradient-to-b from-primary/[0.04] to-transparent rounded-2xl p-10 flex flex-col items-center justify-center text-center">
+                    <p id="out-quote" class="w-full text-balance font-serif text-primary text-[24px] font-bold leading-relaxed tracking-widest px-4"></p>
                 </div>
 
             </main>
@@ -419,7 +416,7 @@
             const quoteText = document.getElementById('in-quote').value;
             const quoteBox = document.getElementById('quote-box');
             if (quoteText) {
-                document.getElementById('out-quote').innerText = `“ ${quoteText} ”`;
+                document.getElementById('out-quote').innerText = quoteText;
                 quoteBox.style.display = "flex";
             } else {
                 quoteBox.style.display = "none";
@@ -455,7 +452,7 @@
             }
         }
 
-        // 🌟 新增：上一頁功能
+        // 上一頁功能
         async function prevPage() {
             if (aiSlidesData.length > 0) {
                 if (currentAiIndex > 0) {
@@ -496,7 +493,7 @@
         }
 
         async function downloadImage() {
-            // 💡 修正：截圖目標指定為內部保持 720px 原始尺寸的 poster-card
+            // 💡 修正：截圖目標指定為內部保持 720px 的 poster-card
             const node = document.getElementById('poster-card');
             const vol = document.getElementById('in-no-num').value;
             const page = document.getElementById('in-curr-page').value;
