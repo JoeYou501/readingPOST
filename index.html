@@ -32,7 +32,9 @@
     <style>
         body { background-color: #e2e8f0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding-bottom: 50px; font-family: 'Noto Sans TC', sans-serif; }
         
-        #poster-card { width: 720px; min-height: 900px; background-color: #fdfbf7; position: relative; flex-shrink: 0; overflow: hidden; }
+        /* 💡 修正手機版裁切：新增 Wrapper 來負責縮放，讓內部 Card 保持原尺寸供截圖 */
+        #poster-wrapper { width: 720px; transform-origin: top center; flex-shrink: 0; }
+        #poster-card { width: 720px; min-height: 900px; background-color: #fdfbf7; position: relative; overflow: hidden; }
         
         /* 🎨 高級雜誌風：網點紋理與柔和環境光晕 */
         .bg-texture-dots { position: absolute; inset: 0; z-index: 1; background-image: radial-gradient(rgba(61, 90, 75, 0.05) 1.5px, transparent 1.5px); background-size: 24px 24px; }
@@ -41,7 +43,8 @@
         .bg-orb-bottom { position: absolute; bottom: -150px; left: -250px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(61, 90, 75, 0.08) 0%, rgba(253, 251, 247, 0) 70%); border-radius: 50%; z-index: 0; }
 
         @media (max-width: 768px) { 
-            #poster-card { transform: scale(0.5); transform-origin: top center; margin-bottom: -450px; } 
+            /* 針對手機版，縮放外層 Wrapper，不影響內層截圖 */
+            #poster-wrapper { transform: scale(0.5); margin-bottom: -450px; } 
             .editor-container { width: 95% !important; } 
         }
         
@@ -140,93 +143,94 @@
                 <input id="in-quote" type="text" oninput="sync()" class="w-full p-4 border border-gray-100 rounded-2xl text-xs italic font-serif" placeholder="結尾金句">
             </div>
 
-            <div class="flex gap-4">
-                <button onclick="downloadImage()" class="flex-1 bg-gray-100 text-gray-500 py-5 rounded-3xl font-black text-xs uppercase tracking-[0.2em] hover:bg-gray-200 transition-all">儲存本頁</button>
-                <button onclick="nextPage()" class="flex-[2] bg-secondary text-bglight py-5 rounded-3xl font-black text-xl shadow-2xl shadow-secondary/30 active:scale-95 transition-all">下一頁</button>
+            <div class="flex gap-3">
+                <button onclick="prevPage()" class="flex-[1] bg-white border border-gray-200 text-gray-500 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-gray-50 active:scale-95 transition-all shadow-sm">上一頁</button>
+                <button onclick="downloadImage()" class="flex-[1.5] bg-primary text-bglight py-4 rounded-2xl font-black text-sm uppercase tracking-[0.1em] shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2"><span>💾 儲存本頁</span></button>
+                <button onclick="nextPage()" class="flex-[1] bg-secondary text-bglight py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-secondary/30 active:scale-95 transition-all">下一頁</button>
             </div>
         </div>
     </div>
 
-    <div id="poster-card" class="p-12 flex flex-col">
-        
-        <div class="bg-texture-dots"></div>
-        <div class="bg-accent-line"></div>
-        <div class="bg-orb-top"></div>
-        <div class="bg-orb-bottom"></div>
+    <div id="poster-wrapper">
+        <div id="poster-card" class="p-12 flex flex-col">
+            
+            <div class="bg-texture-dots"></div>
+            <div class="bg-accent-line"></div>
+            <div class="bg-orb-top"></div>
+            <div class="bg-orb-bottom"></div>
 
-        <header class="mb-8 relative z-10 flex justify-between items-start">
-            <div class="flex items-start gap-4">
-                <div class="flex flex-col">
-                    <span class="font-sans text-secondary tracking-[0.25em] text-[11px] font-bold uppercase mb-1">讀書摘要 ｜ HIGHLIGHTS</span>
-                    <span id="out-tag" class="font-sans text-primary tracking-[0.1em] text-[16px] font-black uppercase leading-none border-b-2 border-primary/20 pb-1.5 inline-block">分類標籤</span>
+            <header class="mb-8 relative z-10 flex justify-between items-start">
+                <div class="flex items-start gap-4">
+                    <div class="flex flex-col">
+                        <span class="font-sans text-secondary tracking-[0.25em] text-[11px] font-bold uppercase mb-1">讀書摘要 ｜ HIGHLIGHTS</span>
+                        <span id="out-tag" class="font-sans text-primary tracking-[0.1em] text-[16px] font-black uppercase leading-none border-b-2 border-primary/20 pb-1.5 inline-block">分類標籤</span>
+                    </div>
                 </div>
-            </div>
-            <div id="out-no-container" class="font-serif text-secondary text-[15px] font-black tracking-widest uppercase mt-1">
-                VOL. <span id="out-no">01</span>
-            </div>
-        </header>
+                <div id="out-no-container" class="font-serif text-secondary text-[15px] font-black tracking-widest uppercase mt-1">
+                    VOL. <span id="out-no">01</span>
+                </div>
+            </header>
 
-        <div class="relative z-10 mb-10">
-            <h1 id="out-title" class="font-serif text-primary text-[46px] font-black leading-[1.15] mb-4 tracking-tight drop-shadow-sm">等待內容...</h1>
-            <h2 id="out-subtitle" class="font-serif text-secondary text-[20px] font-bold tracking-widest italic">等待副標題...</h2>
+            <div class="relative z-10 mb-10">
+                <h1 id="out-title" class="font-serif text-primary text-[46px] font-black leading-[1.15] mb-4 tracking-tight drop-shadow-sm">等待內容...</h1>
+                <h2 id="out-subtitle" class="font-serif text-secondary text-[20px] font-bold tracking-widest italic">等待副標題...</h2>
+            </div>
+            
+            <main class="flex-grow space-y-8 relative z-10 flex flex-col justify-center">
+                
+                <div id="row1" class="flex items-start gap-5 w-full"> 
+                    <div class="flex-shrink-0 mt-0.5">
+                        <div class="w-10 h-10 rounded-full bg-secondary text-bglight font-serif font-black flex items-center justify-center text-[22px] shadow-md">1</div>
+                    </div> 
+                    <div class="w-full border-b border-primary/10 pb-6"> 
+                        <h3 id="out-p1t" class="font-serif text-[24px] font-black text-primary mb-1.5"></h3> 
+                        <p id="out-p1c" class="font-sans text-primary/70 text-[17px] leading-relaxed font-medium"></p> 
+                    </div> 
+                </div>
+
+                <div id="row2" class="flex items-start gap-5 w-full"> 
+                    <div class="flex-shrink-0 mt-0.5">
+                        <div class="w-10 h-10 rounded-full bg-secondary text-bglight font-serif font-black flex items-center justify-center text-[22px] shadow-md">2</div>
+                    </div> 
+                    <div class="w-full border-b border-primary/10 pb-6"> 
+                        <h3 id="out-p2t" class="font-serif text-[24px] font-black text-primary mb-1.5"></h3> 
+                        <p id="out-p2c" class="font-sans text-primary/70 text-[17px] leading-relaxed font-medium"></p> 
+                    </div> 
+                </div>
+
+                <div id="row3" class="flex items-start gap-5 w-full"> 
+                    <div class="flex-shrink-0 mt-0.5">
+                        <div class="w-10 h-10 rounded-full bg-secondary text-bglight font-serif font-black flex items-center justify-center text-[22px] shadow-md">3</div>
+                    </div> 
+                    <div class="w-full pb-2"> 
+                        <h3 id="out-p3t" class="font-serif text-[24px] font-black text-primary mb-1.5"></h3> 
+                        <p id="out-p3c" class="font-sans text-primary/70 text-[17px] leading-relaxed font-medium"></p> 
+                    </div> 
+                </div>
+                
+                <div id="quote-box" class="w-full mt-6 flex flex-col items-center justify-center text-center relative">
+                    <span class="w-10 h-[2px] bg-secondary mb-4 rounded-full"></span>
+                    <p id="out-quote" class="font-serif text-primary text-[22px] font-bold leading-relaxed tracking-wider px-6"></p>
+                    <span class="w-10 h-[2px] bg-secondary mt-4 rounded-full"></span>
+                </div>
+
+            </main>
+            
+            <footer class="mt-8 flex justify-between items-end relative z-10 pt-6">
+                <div class="flex items-center gap-3">
+                    <span id="page-indicator" class="text-bglight text-[12px] font-black px-4 py-1.5 bg-primary/80 rounded-full tracking-widest font-serif shadow-sm">1 / 1</span>
+                </div>
+                <div class="flex items-center gap-2 opacity-90">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-secondary">
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                    <div class="font-sans text-secondary text-[15px] font-black tracking-widest" id="out-ig">JoeYou501</div>
+                </div>
+            </footer>
         </div>
-        
-        <main class="flex-grow space-y-8 relative z-10 flex flex-col justify-center">
-            
-            <div id="row1" class="flex items-start gap-5 w-full"> 
-                <div class="flex-shrink-0 mt-0.5">
-                    <div class="w-10 h-10 rounded-full bg-secondary text-bglight font-serif font-black flex items-center justify-center text-[22px] shadow-md">1</div>
-                </div> 
-                <div class="w-full border-b border-primary/10 pb-6"> 
-                    <h3 id="out-p1t" class="font-serif text-[24px] font-black text-primary mb-1.5"></h3> 
-                    <p id="out-p1c" class="font-sans text-primary/70 text-[17px] leading-relaxed font-medium"></p> 
-                </div> 
-            </div>
-
-            <div id="row2" class="flex items-start gap-5 w-full"> 
-                <div class="flex-shrink-0 mt-0.5">
-                    <div class="w-10 h-10 rounded-full bg-secondary text-bglight font-serif font-black flex items-center justify-center text-[22px] shadow-md">2</div>
-                </div> 
-                <div class="w-full border-b border-primary/10 pb-6"> 
-                    <h3 id="out-p2t" class="font-serif text-[24px] font-black text-primary mb-1.5"></h3> 
-                    <p id="out-p2c" class="font-sans text-primary/70 text-[17px] leading-relaxed font-medium"></p> 
-                </div> 
-            </div>
-
-            <div id="row3" class="flex items-start gap-5 w-full"> 
-                <div class="flex-shrink-0 mt-0.5">
-                    <div class="w-10 h-10 rounded-full bg-secondary text-bglight font-serif font-black flex items-center justify-center text-[22px] shadow-md">3</div>
-                </div> 
-                <div class="w-full pb-2"> 
-                    <h3 id="out-p3t" class="font-serif text-[24px] font-black text-primary mb-1.5"></h3> 
-                    <p id="out-p3c" class="font-sans text-primary/70 text-[17px] leading-relaxed font-medium"></p> 
-                </div> 
-            </div>
-            
-            <div id="quote-box" class="w-full mt-6 flex flex-col items-center justify-center text-center relative">
-                <span class="w-10 h-[2px] bg-secondary mb-4 rounded-full"></span>
-                <p id="out-quote" class="font-serif text-primary text-[22px] font-bold leading-relaxed tracking-wider px-6"></p>
-                <span class="w-10 h-[2px] bg-secondary mt-4 rounded-full"></span>
-            </div>
-
-        </main>
-        
-        <footer class="mt-8 flex justify-between items-end relative z-10 pt-6">
-            <div class="flex items-center gap-3">
-                <span id="page-indicator" class="text-bglight text-[12px] font-black px-4 py-1.5 bg-primary/80 rounded-full tracking-widest font-serif shadow-sm">1 / 1</span>
-            </div>
-            <div class="flex items-center gap-2 opacity-90">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-secondary">
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                </svg>
-                <div class="font-sans text-secondary text-[15px] font-black tracking-widest" id="out-ig">JoeYou501</div>
-            </div>
-        </footer>
-    </div>
-
-    <script>
+    </div> <script>
         let aiSlidesData = [];
         let currentAiIndex = 0;
 
@@ -451,25 +455,23 @@
             }
         }
 
-        async function downloadImage() {
-            const node = document.getElementById('poster-card');
-            const vol = document.getElementById('in-no-num').value;
-            const page = document.getElementById('in-curr-page').value;
-            
-            localStorage.setItem('read_last_no', vol); 
-
-            try {
-                await document.fonts.ready;
-                // 強制採用解析度3並套用專屬背景色
-                const dataUrl = await htmlToImage.toPng(node, { pixelRatio: 3, backgroundColor: '#fdfbf7' });
-                const link = document.createElement('a');
-                link.download = `Editorial-Note-Vol${vol}-P${page}.png`;
-                link.href = dataUrl; 
-                link.click();
-                
-                await new Promise(r => setTimeout(r, 500)); 
-            } catch (err) { 
-                alert('圖片產生出錯，請確認瀏覽器支援 html-to-image 套件。'); 
+        // 🌟 新增：上一頁功能
+        async function prevPage() {
+            if (aiSlidesData.length > 0) {
+                if (currentAiIndex > 0) {
+                    currentAiIndex--;
+                    loadSlideToUI(currentAiIndex);
+                } else {
+                    alert("這已經是第一頁囉！");
+                }
+            } else {
+                let curr = parseInt(document.getElementById('in-curr-page').value);
+                if (curr > 1) { 
+                    document.getElementById('in-curr-page').value = curr - 1; 
+                    sync(); 
+                } else {
+                    alert("這已經是第一頁囉！");
+                }
             }
         }
 
@@ -487,7 +489,35 @@
                 if (curr < total) { 
                     document.getElementById('in-curr-page').value = curr + 1; 
                     sync(); 
+                } else {
+                    alert("🎉 這組圖卡已經到最後一頁囉！");
                 }
+            }
+        }
+
+        async function downloadImage() {
+            // 💡 修正：截圖目標指定為內部保持 720px 原始尺寸的 poster-card
+            const node = document.getElementById('poster-card');
+            const vol = document.getElementById('in-no-num').value;
+            const page = document.getElementById('in-curr-page').value;
+            
+            localStorage.setItem('read_last_no', vol); 
+
+            try {
+                await document.fonts.ready;
+                const dataUrl = await htmlToImage.toPng(node, { 
+                    pixelRatio: 3, 
+                    backgroundColor: '#fdfbf7',
+                    width: 720 // 強制要求截圖寬度
+                });
+                const link = document.createElement('a');
+                link.download = `Editorial-Note-Vol${vol}-P${page}.png`;
+                link.href = dataUrl; 
+                link.click();
+                
+                await new Promise(r => setTimeout(r, 500)); 
+            } catch (err) { 
+                alert('圖片產生出錯，請確認瀏覽器支援 html-to-image 套件。'); 
             }
         }
     </script>
