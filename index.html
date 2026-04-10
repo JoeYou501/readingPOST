@@ -342,17 +342,18 @@
             btn.disabled = true; 
             btnText.innerText = `🚀 正在呼叫 ${selectedModel}...`;
 
+            // 🌟 修補指令：強制要求 AI 給出絕對等於 3 個重點
             const prompt = `請以「具備深度洞察力的書評家與編輯」的角度，將以下長篇內容拆解成一組正好 ${targetPages} 頁的「圖卡貼文」。
             請以 JSON 格式回應，不要包含 Markdown 標記。
             【嚴格規定】：
             1. 總共必須產出正好 ${targetPages} 頁 (slides)。
             2. 第 1 頁必須是「封面」(type: "cover")：包含1個主標題、1句副標題。不能有重點 (points) 與金句 (quote)。
-            3. 第 2 到 ${targetPages - 1} 頁必須是「內容」(type: "content")：包含單頁標題、副標題、最多3個核心重點（格式為「小標題|內文描述」）、1句段落金句。
+            3. 第 2 到 ${targetPages - 1} 頁必須是「內容」(type: "content")：包含單頁標題、副標題、絕對要產出剛好 3 個核心重點（格式為「小標題|內文描述」）、1句段落金句。
             4. 第 ${targetPages} 頁必須是「結論」(type: "conclusion")：包含總結標題、1句強而有力的總結金句。不能有重點 (points)。
             結構必須精準相符：
             {"slides": [
                 {"type": "cover", "title": "封面主標題", "subtitle": "封面副標題", "points": [], "quote": ""},
-                {"type": "content", "title": "單頁標題", "subtitle": "副標題", "points": ["小標題一|內文描述"], "quote": "段落金句"},
+                {"type": "content", "title": "單頁標題", "subtitle": "副標題", "points": ["小標題一|內文描述", "小標題二|內文描述", "小標題三|內文描述"], "quote": "段落金句"},
                 {"type": "conclusion", "title": "總結標題", "subtitle": "", "points": [], "quote": "總結金句"}
             ]}
             輸入長文：\n${raw}`;
@@ -481,24 +482,19 @@
             const outQuote = document.getElementById('out-quote');
             const quoteText = document.getElementById('in-quote').value;
             
-            // 🌟 預設共用的文字設計基底
             const baseTitleClass = "font-serif text-primary font-black leading-[1.15] tracking-tight drop-shadow-sm transition-all duration-300";
             const baseSubtitleClass = "font-serif text-secondary font-bold tracking-widest italic transition-all duration-300";
 
             if (slideType === 'cover') {
-                // 【模式 1：封面】暴力置中：使用 flex-grow 佔滿空間並完全居中
                 titleArea.style.display = "flex";
                 mainContent.style.display = "none";
                 
-                // 完全抹除邊距，取得 100% 剩餘空間來置中
                 titleArea.className = "w-full flex-grow flex flex-col items-center justify-center relative z-10 px-8";
                 
-                // 封面字體放大，並強制居中
                 outTitle.className = baseTitleClass + " text-[56px] text-center";
                 outSubtitle.className = baseSubtitleClass + " text-[24px] text-center mt-4";
 
             } else if (slideType === 'conclusion') {
-                // 【模式 2：結論】
                 titleArea.style.display = "none";
                 mainContent.style.display = "flex";
                 
@@ -517,11 +513,9 @@
                 }
 
             } else {
-                // 【模式 3：內容】
                 titleArea.style.display = "block";
                 mainContent.style.display = "flex";
                 
-                // 內容模式專屬的邊距排版
                 titleArea.className = "w-full relative z-10 mb-8";
                 mainContent.className = "flex-grow space-y-8 relative z-10 flex flex-col justify-center";
                 
