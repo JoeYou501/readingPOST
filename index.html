@@ -157,18 +157,14 @@
 
             <div class="flex gap-3">
                 <button onclick="prevPage()" class="flex-[1] bg-white border border-gray-200 text-gray-500 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-gray-50 active:scale-95 transition-all shadow-sm">上一頁</button>
-                
-                <button id="download-btn" onclick="downloadImage()" class="flex-[1.5] bg-primary text-bglight py-4 rounded-2xl font-black text-sm uppercase tracking-[0.1em] shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2">
-                    <span id="download-text">💾 儲存本頁</span>
-                </button>
-                
+                <button onclick="downloadImage()" class="flex-[1.5] bg-primary text-bglight py-4 rounded-2xl font-black text-sm uppercase tracking-[0.1em] shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2"><span>💾 儲存本頁</span></button>
                 <button onclick="nextPage()" class="flex-[1] bg-secondary text-bglight py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-secondary/30 active:scale-95 transition-all">下一頁</button>
             </div>
         </div>
     </div>
 
     <div id="poster-wrapper">
-        <div id="poster-card" class="p-12 flex flex-col relative"> 
+        <div id="poster-card" class="p-12"> 
             
             <div class="bg-texture-dots"></div>
             <div class="bg-accent-line"></div>
@@ -176,11 +172,9 @@
             <div class="bg-orb-bottom"></div>
 
             <header class="mb-8 relative z-10 flex justify-between items-start" id="out-header">
-                <div class="flex items-start gap-4">
-                    <div class="flex flex-col">
-                        <span class="font-sans text-secondary tracking-[0.25em] text-[11px] font-bold uppercase mb-1 whitespace-nowrap">讀書摘要 ｜ HIGHLIGHTS</span>
-                        <span id="out-tag" class="font-sans text-primary tracking-[0.1em] text-[16px] font-black uppercase leading-none border-b-2 border-primary/20 pb-1.5 inline-block whitespace-nowrap">分類標籤</span>
-                    </div>
+                <div>
+                    <div class="font-sans text-secondary tracking-[0.25em] text-[11px] font-bold uppercase mb-2 block whitespace-nowrap">讀書摘要 ｜ HIGHLIGHTS</div>
+                    <div id="out-tag" class="font-sans text-primary tracking-[0.1em] text-[16px] font-black uppercase border-b-2 border-primary/20 pb-1.5 inline-block whitespace-nowrap">分類標籤</div>
                 </div>
                 <div id="out-no-container" class="font-serif text-secondary text-[15px] font-black tracking-widest uppercase mt-1 whitespace-nowrap">
                     VOL. <span id="out-no">01</span>
@@ -496,7 +490,7 @@
             mainContent.style.display = "flex"; 
             outHeader.style.display = "flex"; 
             
-            // 洗除絕對定位置中的 class
+            // 洗除絕對定位置中的 class，恢復原本的流式排版
             titleArea.classList.remove('absolute', 'top-1/2', 'left-1/2', 'transform', '-translate-x-1/2', '-translate-y-1/2', 'px-12', 'z-20', 'flex', 'flex-col', 'items-center', 'justify-center');
             titleArea.classList.add('mb-10', 'relative', 'z-10');
             outTitle.classList.remove('text-center', 'w-full');
@@ -508,7 +502,8 @@
                 document.getElementById('row2').style.display = "none";
                 document.getElementById('row3').style.display = "none";
                 quoteBox.style.display = "none";
-                outHeader.style.display = "none"; 
+                
+                // 保留 Header (不隱藏 outHeader)
                 mainContent.style.display = "none"; 
                 
                 // 將標題區塊設為 absolute，無條件完美居中
@@ -594,17 +589,7 @@
             }
         }
 
-        // 🚀 手機出圖效能終極優化：改用 JPEG 與 pixelRatio 2，並加入 loading 動畫
         async function downloadImage() {
-            const btn = document.getElementById('download-btn');
-            const btnText = document.getElementById('download-text');
-            const originalText = btnText.innerText;
-            
-            // 讓按鈕顯示處理中，防止重複點擊
-            btnText.innerText = "⏳ 影像處理中...";
-            btn.disabled = true;
-            btn.classList.add("opacity-70", "cursor-not-allowed");
-
             const node = document.getElementById('poster-card');
             const vol = document.getElementById('in-no-num').value;
             const page = document.getElementById('in-curr-page').value;
@@ -614,18 +599,21 @@
 
             try {
                 await document.fonts.ready;
-                // 💡 效能關鍵：改用 toJpeg，解析度降為 2 (1440px)，速度飛快且畫質對 IG 依然完美
-                const dataUrl = await htmlToImage.toJpeg(node, { 
-                    pixelRatio: 2, 
-                    quality: 0.95,
+                const dataUrl = await htmlToImage.toPng(node, { 
+                    pixelRatio: 3, 
                     backgroundColor: '#fdfbf7',
                     width: 720 
                 });
                 const link = document.createElement('a');
-                link.download = `Editorial-Note-Vol${vol}-P${page}-${type}.jpg`;
+                link.download = `Editorial-Note-Vol${vol}-P${page}-${type}.png`;
                 link.href = dataUrl; 
                 link.click();
                 
                 await new Promise(r => setTimeout(r, 500)); 
             } catch (err) { 
-                alert('圖片產生出錯，請確認瀏覽器支援 html-to-image 套件。
+                alert('圖片產生出錯，請確認瀏覽器支援 html-to-image 套件。'); 
+            }
+        }
+    </script>
+</body>
+</html>
