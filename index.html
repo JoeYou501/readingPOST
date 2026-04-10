@@ -32,9 +32,10 @@
     <style>
         body { background-color: #e2e8f0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding-bottom: 50px; font-family: 'Noto Sans TC', sans-serif; }
         
-        /* 💡 Wrapper 包裝器負責縮放，Card 保持原尺寸 */
         #poster-wrapper { width: 720px; transform-origin: top center; flex-shrink: 0; }
-        #poster-card { width: 720px; min-height: 900px; background-color: #fdfbf7; position: relative; overflow: hidden; }
+        
+        /* 💡 核心修正：強制鎖死 height: 900px，防止容器坍塌 */
+        #poster-card { width: 720px; height: 900px; background-color: #fdfbf7; position: relative; overflow: hidden; display: flex; flex-direction: column; }
         
         /* 🎨 高級雜誌風：網點紋理與柔和環境光晕 */
         .bg-texture-dots { position: absolute; inset: 0; z-index: 1; background-image: radial-gradient(rgba(61, 90, 75, 0.05) 1.5px, transparent 1.5px); background-size: 24px 24px; }
@@ -163,14 +164,14 @@
     </div>
 
     <div id="poster-wrapper">
-        <div id="poster-card" class="p-12 flex flex-col">
+        <div id="poster-card" class="p-12"> 
             
             <div class="bg-texture-dots"></div>
             <div class="bg-accent-line"></div>
             <div class="bg-orb-top"></div>
             <div class="bg-orb-bottom"></div>
 
-            <header class="mb-8 relative z-10 flex justify-between items-start">
+            <header class="mb-8 relative z-10 flex justify-between items-start" id="out-header">
                 <div class="flex items-start gap-4">
                     <div class="flex flex-col">
                         <span class="font-sans text-secondary tracking-[0.25em] text-[11px] font-bold uppercase mb-1">讀書摘要 ｜ HIGHLIGHTS</span>
@@ -182,12 +183,12 @@
                 </div>
             </header>
 
-            <div id="title-area">
-                <h1 id="out-title">等待內容...</h1>
-                <h2 id="out-subtitle">等待副標題...</h2>
+            <div id="title-area" class="w-full relative z-10 mb-10 transition-all duration-300">
+                <h1 id="out-title" class="font-serif text-primary text-[46px] font-black leading-[1.15] mb-4 tracking-tight drop-shadow-sm transition-all duration-300">等待內容...</h1>
+                <h2 id="out-subtitle" class="font-serif text-secondary text-[20px] font-bold tracking-widest italic transition-all duration-300">等待副標題...</h2>
             </div>
             
-            <main id="main-content">
+            <main id="main-content" class="flex-grow space-y-8 relative z-10 flex flex-col justify-center w-full pb-16">
                 
                 <div id="row1" class="flex items-start gap-5 w-full"> 
                     <div class="flex-shrink-0 mt-0.5">
@@ -225,7 +226,7 @@
 
             </main>
             
-            <footer class="mt-8 flex justify-between items-end relative z-10 pt-6">
+            <footer class="absolute bottom-12 left-12 right-12 flex justify-between items-end z-30">
                 <div class="flex items-center gap-3">
                     <span id="page-indicator" class="text-bglight text-[12px] font-black px-4 py-1.5 bg-primary/80 rounded-full tracking-widest font-serif shadow-sm transition-opacity duration-300 inline-block">1 / 1</span>
                 </div>
@@ -342,18 +343,18 @@
             btn.disabled = true; 
             btnText.innerText = `🚀 正在呼叫 ${selectedModel}...`;
 
-            // 🌟 修補指令：強制要求 AI 給出絕對等於 3 個重點
             const prompt = `請以「具備深度洞察力的書評家與編輯」的角度，將以下長篇內容拆解成一組正好 ${targetPages} 頁的「圖卡貼文」。
             請以 JSON 格式回應，不要包含 Markdown 標記。
-            【嚴格規定】：
+            【最高指導原則】：
             1. 總共必須產出正好 ${targetPages} 頁 (slides)。
             2. 第 1 頁必須是「封面」(type: "cover")：包含1個主標題、1句副標題。不能有重點 (points) 與金句 (quote)。
-            3. 第 2 到 ${targetPages - 1} 頁必須是「內容」(type: "content")：包含單頁標題、副標題、絕對要產出剛好 3 個核心重點（格式為「小標題|內文描述」）、1句段落金句。
+            3. 第 2 到 ${targetPages - 1} 頁必須是「內容」(type: "content")：包含單頁標題、副標題、1句段落金句。
+               👉 【強制規定】：每一頁內容頁「絕對要」產出「剛好 3 個」核心重點（格式為「小標題|內文描述」）。如果該段落內容較少，請務必將觀念細分拆解，無論如何都不准少於 3 個重點！
             4. 第 ${targetPages} 頁必須是「結論」(type: "conclusion")：包含總結標題、1句強而有力的總結金句。不能有重點 (points)。
-            結構必須精準相符：
+            結構必須精準相符，points 陣列內必須剛好有 3 個字串：
             {"slides": [
                 {"type": "cover", "title": "封面主標題", "subtitle": "封面副標題", "points": [], "quote": ""},
-                {"type": "content", "title": "單頁標題", "subtitle": "副標題", "points": ["小標題一|內文描述", "小標題二|內文描述", "小標題三|內文描述"], "quote": "段落金句"},
+                {"type": "content", "title": "單頁標題", "subtitle": "副標題", "points": ["重點一小標題|內文描述", "重點二小標題|內文描述", "重點三小標題|內文描述"], "quote": "段落金句"},
                 {"type": "conclusion", "title": "總結標題", "subtitle": "", "points": [], "quote": "總結金句"}
             ]}
             輸入長文：\n${raw}`;
@@ -478,6 +479,7 @@
             const slideType = document.getElementById('in-type').value;
             const titleArea = document.getElementById('title-area');
             const mainContent = document.getElementById('main-content'); 
+            const outHeader = document.getElementById('out-header');
             const quoteBox = document.getElementById('quote-box');
             const outQuote = document.getElementById('out-quote');
             const quoteText = document.getElementById('in-quote').value;
@@ -485,24 +487,41 @@
             const baseTitleClass = "font-serif text-primary font-black leading-[1.15] tracking-tight drop-shadow-sm transition-all duration-300";
             const baseSubtitleClass = "font-serif text-secondary font-bold tracking-widest italic transition-all duration-300";
 
-            if (slideType === 'cover') {
-                titleArea.style.display = "flex";
-                mainContent.style.display = "none";
-                
-                titleArea.className = "w-full flex-grow flex flex-col items-center justify-center relative z-10 px-8";
-                
-                outTitle.className = baseTitleClass + " text-[56px] text-center";
-                outSubtitle.className = baseSubtitleClass + " text-[24px] text-center mt-4";
+            // 每次同步前先還原排版
+            titleArea.style.display = "block";
+            mainContent.style.display = "flex"; 
+            outHeader.style.display = "flex"; 
+            
+            // 洗除絕對定位置中的 class，恢復原本的流式排版
+            titleArea.classList.remove('absolute', 'top-1/2', 'left-1/2', 'transform', '-translate-x-1/2', '-translate-y-1/2', 'px-12', 'z-20', 'flex', 'flex-col', 'items-center', 'justify-center');
+            titleArea.classList.add('mb-10', 'relative', 'z-10');
+            outTitle.classList.remove('text-center', 'w-full');
+            outSubtitle.classList.remove('text-center', 'mt-4', 'w-full');
 
-            } else if (slideType === 'conclusion') {
-                titleArea.style.display = "none";
-                mainContent.style.display = "flex";
-                
-                mainContent.className = "flex-grow flex flex-col justify-center relative z-10 w-full";
-                
+            if (slideType === 'cover') {
+                // 🛑 模式 1：封面
                 document.getElementById('row1').style.display = "none";
                 document.getElementById('row2').style.display = "none";
                 document.getElementById('row3').style.display = "none";
+                quoteBox.style.display = "none";
+                outHeader.style.display = "none"; 
+                mainContent.style.display = "none"; 
+                
+                // 💡 關鍵置中：給標題加上 absolute 定位，並在畫布上精準居中
+                titleArea.classList.remove('relative', 'mb-10');
+                titleArea.classList.add('absolute', 'top-1/2', 'left-1/2', 'transform', '-translate-x-1/2', '-translate-y-1/2', 'w-full', 'px-12', 'z-20', 'flex', 'flex-col', 'items-center', 'justify-center');
+                
+                outTitle.className = baseTitleClass + " text-[56px] text-center w-full";
+                outSubtitle.className = baseSubtitleClass + " text-[24px] text-center mt-4 w-full";
+
+            } else if (slideType === 'conclusion') {
+                // 🛑 模式 2：結論
+                document.getElementById('row1').style.display = "none";
+                document.getElementById('row2').style.display = "none";
+                document.getElementById('row3').style.display = "none";
+                
+                titleArea.style.display = "none";
+                titleArea.classList.remove('mb-10'); 
                 
                 if (quoteText) {
                     outQuote.innerText = quoteText;
@@ -513,20 +532,15 @@
                 }
 
             } else {
-                titleArea.style.display = "block";
-                mainContent.style.display = "flex";
-                
-                titleArea.className = "w-full relative z-10 mb-8";
-                mainContent.className = "flex-grow space-y-8 relative z-10 flex flex-col justify-center";
-                
-                outTitle.className = baseTitleClass + " text-[42px] mb-3 text-left";
-                outSubtitle.className = baseSubtitleClass + " text-[18px] text-left border-l-4 border-secondary pl-4 py-0.5";
-                
+                // 🛑 模式 3：內容
                 for (let i = 1; i <= 3; i++) {
                     const val = document.getElementById('in-p' + i).value;
                     document.getElementById(`row${i}`).style.display = val ? "flex" : "none";
                 }
                 
+                outTitle.className = baseTitleClass + " text-[42px]";
+                outSubtitle.className = baseSubtitleClass + " text-[20px]";
+
                 if (quoteText) {
                     outQuote.innerText = quoteText;
                     quoteBox.style.display = "flex";
