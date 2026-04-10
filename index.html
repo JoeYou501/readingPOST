@@ -164,26 +164,24 @@
     </div>
 
     <div id="poster-wrapper">
-        <div id="poster-card" class="p-12"> 
+        <div id="poster-card" class="p-12 w-full h-full relative"> 
             
             <div class="bg-texture-dots"></div>
             <div class="bg-accent-line"></div>
             <div class="bg-orb-top"></div>
             <div class="bg-orb-bottom"></div>
 
-            <header class="mb-8 relative z-10 flex justify-between items-start" id="out-header">
-                <div class="flex items-start gap-4">
-                    <div class="flex flex-col">
-                        <span class="font-sans text-secondary tracking-[0.25em] text-[11px] font-bold uppercase mb-1">讀書摘要 ｜ HIGHLIGHTS</span>
-                        <span id="out-tag" class="font-sans text-primary tracking-[0.1em] text-[16px] font-black uppercase leading-none border-b-2 border-primary/20 pb-1.5 inline-block">分類標籤</span>
-                    </div>
+            <header class="relative z-10 flex justify-between items-start w-full" id="out-header">
+                <div>
+                    <div class="font-sans text-secondary tracking-[0.25em] text-[11px] font-bold uppercase mb-2 block">讀書摘要 ｜ HIGHLIGHTS</div>
+                    <div id="out-tag" class="font-sans text-primary tracking-[0.1em] text-[16px] font-black uppercase border-b-2 border-primary/20 pb-1.5 inline-block">分類標籤</div>
                 </div>
                 <div id="out-no-container" class="font-serif text-secondary text-[15px] font-black tracking-widest uppercase mt-1">
                     VOL. <span id="out-no">01</span>
                 </div>
             </header>
 
-            <div id="title-area" class="w-full relative z-10 mb-10 transition-all duration-300">
+            <div id="title-area" class="w-full relative z-10 mb-10 mt-8 transition-all duration-300">
                 <h1 id="out-title" class="font-serif text-primary text-[46px] font-black leading-[1.15] mb-4 tracking-tight drop-shadow-sm transition-all duration-300">等待內容...</h1>
                 <h2 id="out-subtitle" class="font-serif text-secondary text-[20px] font-bold tracking-widest italic transition-all duration-300">等待副標題...</h2>
             </div>
@@ -487,14 +485,13 @@
             const baseTitleClass = "font-serif text-primary font-black leading-[1.15] tracking-tight drop-shadow-sm transition-all duration-300";
             const baseSubtitleClass = "font-serif text-secondary font-bold tracking-widest italic transition-all duration-300";
 
-            // 每次同步前先還原排版
+            // 每次同步前先還原所有區塊顯示與流排版
             titleArea.style.display = "block";
             mainContent.style.display = "flex"; 
             outHeader.style.display = "flex"; 
             
-            // 洗除絕對定位置中的 class，恢復原本的流式排版
             titleArea.classList.remove('absolute', 'top-1/2', 'left-1/2', 'transform', '-translate-x-1/2', '-translate-y-1/2', 'px-12', 'z-20', 'flex', 'flex-col', 'items-center', 'justify-center');
-            titleArea.classList.add('mb-10', 'relative', 'z-10');
+            titleArea.classList.add('mb-10', 'mt-8', 'relative', 'z-10'); // 恢復正常排版的邊距
             outTitle.classList.remove('text-center', 'w-full');
             outSubtitle.classList.remove('text-center', 'mt-4', 'w-full');
 
@@ -504,11 +501,13 @@
                 document.getElementById('row2').style.display = "none";
                 document.getElementById('row3').style.display = "none";
                 quoteBox.style.display = "none";
-                outHeader.style.display = "none"; 
+                
+                // 💡 封面保留 Header 顯示，只有中間的 main 內容隱藏
+                outHeader.style.display = "flex"; 
                 mainContent.style.display = "none"; 
                 
-                // 💡 關鍵置中：給標題加上 absolute 定位，並在畫布上精準居中
-                titleArea.classList.remove('relative', 'mb-10');
+                // 將標題區塊設為 absolute 進行絕對幾何置中
+                titleArea.classList.remove('relative', 'mb-10', 'mt-8');
                 titleArea.classList.add('absolute', 'top-1/2', 'left-1/2', 'transform', '-translate-x-1/2', '-translate-y-1/2', 'w-full', 'px-12', 'z-20', 'flex', 'flex-col', 'items-center', 'justify-center');
                 
                 outTitle.className = baseTitleClass + " text-[56px] text-center w-full";
